@@ -174,12 +174,40 @@ const Icon = {
       <path d="M3 20.5v-17c0-.83 1-.99 1.4-.37l14.96 8.5c.41.23.41.87 0 1.1L4.4 21.87c-.4.62-1.4.46-1.4-.37z" />
     </svg>
   ),
+  sun: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin-slow">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  ),
+  moon: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  ),
 }
 
 // ── Navigation ────────────────────────────────────────────────────
 type Page = 'home' | 'apps' | 'about' | 'contact'
 
-function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }) {
+function Nav({
+  current,
+  setPage,
+  theme,
+  toggleTheme,
+}: {
+  current: Page
+  setPage: (p: Page) => void
+  theme: 'light' | 'dark'
+  toggleTheme: () => void
+}) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -209,11 +237,11 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? 'rgba(255,255,255,0.94)' : 'rgba(255,255,255,0.82)',
+        background: scrolled ? 'var(--nav-bg-scrolled)' : 'var(--nav-bg)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: scrolled ? '1px solid rgba(226,232,240,0.8)' : '1px solid transparent',
-        boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.06)' : 'none',
+        borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
+        boxShadow: scrolled ? 'var(--shadow)' : 'none',
       }}
     >
       <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -230,10 +258,10 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
             AIS
           </div>
           <div className="text-left hidden sm:block">
-            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', lineHeight: 1.1 }}>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--foreground)', lineHeight: 1.1 }}>
               AIS Enterprises
             </div>
-            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 400, fontSize: '0.72rem', color: '#64748b', lineHeight: 1 }}>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 400, fontSize: '0.72rem', color: 'var(--muted-foreground)', lineHeight: 1 }}>
               & Aasan IT
             </div>
           </div>
@@ -249,8 +277,8 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
                 fontFamily: 'Outfit, sans-serif',
                 fontWeight: current === l.page ? 600 : 500,
                 fontSize: '0.9rem',
-                color: current === l.page ? '#2563eb' : '#374151',
-                background: current === l.page ? 'rgba(37,99,235,0.07)' : 'none',
+                color: current === l.page ? 'var(--accent)' : 'var(--foreground)',
+                background: current === l.page ? 'var(--badge-bg)' : 'none',
                 border: 'none',
                 cursor: 'pointer',
                 padding: '0.4rem 0.85rem',
@@ -259,14 +287,14 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
               }}
               onMouseEnter={(e) => {
                 if (current !== l.page) {
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.04)'
-                  e.currentTarget.style.color = '#1e3a8a'
+                  e.currentTarget.style.background = 'var(--badge-bg)'
+                  e.currentTarget.style.color = 'var(--accent)'
                 }
               }}
               onMouseLeave={(e) => {
                 if (current !== l.page) {
                   e.currentTarget.style.background = 'none'
-                  e.currentTarget.style.color = '#374151'
+                  e.currentTarget.style.color = 'var(--foreground)'
                 }
               }}
             >
@@ -275,22 +303,50 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
           ))}
         </div>
 
-        {/* CTA */}
+        {/* CTA & Theme toggle */}
         <div className="hidden md:flex items-center gap-3">
-          <button className="btn-primary" onClick={() => navigate('contact')} style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
+          <button
+            onClick={toggleTheme}
+            className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 hover:scale-105"
+            style={{
+              background: 'none',
+              borderColor: 'var(--border)',
+              color: 'var(--foreground)',
+              cursor: 'pointer',
+            }}
+            aria-label="Toggle Theme"
+          >
+            {theme === 'light' ? <Icon.moon /> : <Icon.sun />}
+          </button>
+          <button className="btn-primary btn-pulse" onClick={() => navigate('contact')} style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
             Get in Touch
           </button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#374151' }}
-          onClick={() => setMobileOpen((o) => !o)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <Icon.x /> : <Icon.menu />}
-        </button>
+        {/* Mobile controls */}
+        <div className="md:hidden flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-lg flex items-center justify-center border"
+            style={{
+              background: 'none',
+              borderColor: 'var(--border)',
+              color: 'var(--foreground)',
+              cursor: 'pointer',
+            }}
+            aria-label="Toggle Theme"
+          >
+            {theme === 'light' ? <Icon.moon /> : <Icon.sun />}
+          </button>
+          <button
+            className="flex items-center justify-center w-9 h-9 rounded-lg"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <Icon.x /> : <Icon.menu />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
@@ -299,8 +355,8 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
           maxHeight: mobileOpen ? '400px' : '0',
           overflow: 'hidden',
           transition: 'max-height 0.35s ease',
-          background: 'rgba(255,255,255,0.97)',
-          borderTop: mobileOpen ? '1px solid #e2e8f0' : 'none',
+          background: 'var(--nav-bg-scrolled)',
+          borderTop: mobileOpen ? '1px solid var(--border)' : 'none',
         }}
       >
         <div className="px-6 py-4 flex flex-col gap-1">
@@ -312,8 +368,8 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
                 fontFamily: 'Outfit, sans-serif',
                 fontWeight: current === l.page ? 600 : 500,
                 fontSize: '1rem',
-                color: current === l.page ? '#2563eb' : '#374151',
-                background: current === l.page ? 'rgba(37,99,235,0.07)' : 'none',
+                color: current === l.page ? 'var(--accent)' : 'var(--foreground)',
+                background: current === l.page ? 'var(--badge-bg)' : 'none',
                 border: 'none',
                 cursor: 'pointer',
                 padding: '0.65rem 0.85rem',
@@ -326,7 +382,7 @@ function Nav({ current, setPage }: { current: Page; setPage: (p: Page) => void }
             </button>
           ))}
           <button
-            className="btn-primary mt-2 justify-center"
+            className="btn-primary mt-2 justify-center btn-pulse"
             onClick={() => navigate('contact')}
           >
             Get in Touch
@@ -353,7 +409,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
   ]
 
   return (
-    <footer style={{ background: '#0f172a', color: '#94a3b8' }}>
+    <footer style={{ background: 'var(--footer-bg)', color: '#94a3b8' }}>
       {/* Main footer */}
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid gap-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
@@ -519,11 +575,11 @@ function AppCard({
 }) {
   return (
     <div
-      className="card-hover rounded-2xl p-7 flex flex-col gap-4"
+      className="card-hover card-hover-shine rounded-2xl p-7 flex flex-col gap-4"
       style={{
-        background: '#fff',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow)',
       }}
     >
       {/* App icon */}
@@ -534,14 +590,14 @@ function AppCard({
         {initial}
       </div>
       <div>
-        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a' }}>
+        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'var(--foreground)' }}>
           {name}
         </div>
-        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: '#2563eb', marginTop: '0.2rem' }}>
+        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.82rem', color: 'var(--accent)', marginTop: '0.2rem' }}>
           {tagline}
         </div>
       </div>
-      <p style={{ fontSize: '0.9rem', lineHeight: 1.65, color: '#64748b', flex: 1 }}>{description}</p>
+      <p style={{ fontSize: '0.9rem', lineHeight: 1.65, color: 'var(--desc-color)', flex: 1 }}>{description}</p>
 
       <div className="flex items-center gap-3 mt-1">
         <button
@@ -605,7 +661,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
           minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
-          background: 'linear-gradient(160deg, #f0f6ff 0%, #f8fafc 40%, #f0f9ff 100%)',
+          background: 'var(--hero-bg)',
         }}
       >
         {/* Decorative blobs */}
@@ -674,7 +730,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                   fontWeight: 900,
                   fontSize: 'clamp(2.5rem, 5vw, 4rem)',
                   lineHeight: 1.1,
-                  color: '#0f172a',
+                  color: 'var(--foreground)',
                   marginBottom: '1.25rem',
                   animationDelay: '0.2s',
                 }}
@@ -686,7 +742,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                     display: 'inline-block',
                   }}
                 >
-                  <span className="gradient-text">Create.</span>
+                  <span className="animate-gradient-shift">Create.</span>
                   <span
                     style={{
                       position: 'absolute',
@@ -707,7 +763,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                 style={{
                   fontSize: '1.1rem',
                   lineHeight: 1.75,
-                  color: '#475569',
+                  color: 'var(--desc-color)',
                   maxWidth: '520px',
                   marginBottom: '2rem',
                   animationDelay: '0.3s',
@@ -716,7 +772,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                 Simplifying business management through innovative digital applications that help businesses save time, reduce paperwork, and embrace modern technology.
               </p>
               <div className="flex flex-wrap gap-3 animate-fade-up" style={{ animationDelay: '0.4s' }}>
-                <button className="btn-primary" onClick={() => navigate('apps')}>
+                <button className="btn-primary btn-pulse" onClick={() => navigate('apps')}>
                   Explore Our Apps <Icon.arrow />
                 </button>
                 <button className="btn-outline" onClick={() => navigate('contact')}>
@@ -735,7 +791,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                   { num: '24/7', label: 'Support' },
                 ].map((s) => (
                   <div key={s.label}>
-                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.8rem', color: '#1e3a8a' }}>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.8rem', color: 'var(--accent)' }}>
                       {s.num}
                     </div>
                     <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 500 }}>{s.label}</div>
@@ -746,7 +802,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
 
             {/* Right: Illustration */}
             <div className="hidden lg:flex items-center justify-center">
-              <div className="relative animate-float">
+              <div className="relative animate-float-premium">
                 {/* Main card */}
                 <div
                   className="rounded-3xl p-8 relative"
@@ -808,14 +864,14 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                 <div
                   style={{
                     position: 'absolute', top: '-16px', right: '-24px',
-                    background: '#fff',
+                    background: 'var(--card)',
                     borderRadius: '12px', padding: '0.6rem 1rem',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                    boxShadow: 'var(--shadow)',
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
                   }}
                 >
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
-                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#0f172a' }}>
+                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'var(--foreground)' }}>
                     Live & Active
                   </span>
                 </div>
@@ -824,14 +880,14 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                 <div
                   style={{
                     position: 'absolute', bottom: '-16px', left: '-20px',
-                    background: '#fff',
+                    background: 'var(--card)',
                     borderRadius: '12px', padding: '0.6rem 1rem',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                    boxShadow: 'var(--shadow)',
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
                   }}
                 >
                   <span style={{ color: '#f59e0b' }}><Icon.star /></span>
-                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#0f172a' }}>
+                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'var(--foreground)' }}>
                     5.0 on Play Store
                   </span>
                 </div>
@@ -842,18 +898,18 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
       </section>
 
       {/* About strip */}
-      <section style={{ background: '#fff', padding: '5rem 0' }}>
+      <section style={{ background: 'var(--background)', padding: '5rem 0' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid gap-12 items-center" style={{ gridTemplateColumns: '1fr 1fr' }}>
             <Reveal>
               <div
                 className="rounded-3xl p-8 relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', minHeight: '280px' }}
+                style={{ background: 'var(--secondary)', minHeight: '280px' }}
               >
                 <div style={{
                   position: 'absolute', right: '-20px', bottom: '-20px',
                   width: '200px', height: '200px', borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(37,99,235,0.12), transparent)',
+                  background: 'radial-gradient(circle, var(--badge-border), transparent)',
                 }} />
                 {[
                   { label: 'Aasan Dairy', color: '#0ea5e9', desc: 'Dairy Management' },
@@ -862,14 +918,14 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                   <div
                     key={app.label}
                     className="flex items-center gap-4 p-4 mb-3 rounded-2xl"
-                    style={{ background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}
+                    style={{ background: 'var(--card)', boxShadow: 'var(--shadow)' }}
                   >
                     <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: app.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.8rem' }}>
                       {app.label.split(' ').map(w => w[0]).join('')}
                     </div>
                     <div>
-                      <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{app.label}</div>
-                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{app.desc}</div>
+                      <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--foreground)' }}>{app.label}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)' }}>{app.desc}</div>
                     </div>
                     <div className="ml-auto flex items-center gap-1" style={{ color: '#22c55e', fontSize: '0.78rem', fontWeight: 600, fontFamily: 'Outfit, sans-serif' }}>
                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
@@ -877,7 +933,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                     </div>
                   </div>
                 ))}
-                <div style={{ textAlign: 'center', marginTop: '1rem', fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.8rem', color: '#94a3b8' }}>
+                <div style={{ textAlign: 'center', marginTop: '1rem', fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>
                   More apps coming soon...
                 </div>
               </div>
@@ -885,26 +941,26 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
 
             <Reveal delay={2}>
               <div className="section-badge">About Us</div>
-              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: '#0f172a', lineHeight: 1.2, marginBottom: '1.25rem' }}>
+              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: 'var(--foreground)', lineHeight: 1.2, marginBottom: '1.25rem' }}>
                 AIS Enterprises & Aasan IT
               </h2>
-              <p style={{ fontSize: '1rem', lineHeight: 1.8, color: '#475569', marginBottom: '1rem' }}>
+              <p style={{ fontSize: '1rem', lineHeight: 1.8, color: 'var(--desc-color)', marginBottom: '1rem' }}>
                 AIS Enterprises & Aasan IT develops smart digital solutions that simplify everyday business operations. We are committed to helping Pakistani businesses grow through technology.
               </p>
-              <p style={{ fontSize: '1rem', lineHeight: 1.8, color: '#475569', marginBottom: '1.5rem' }}>
+              <p style={{ fontSize: '1rem', lineHeight: 1.8, color: 'var(--desc-color)', marginBottom: '1.5rem' }}>
                 Our applications help businesses reduce paperwork, improve productivity, organize workflows, and adopt modern technology with ease.
               </p>
               <div className="flex flex-col gap-2">
                 {['Available on Google Play Store', 'Designed for Pakistani businesses', 'Continuous updates & support'].map((item) => (
-                  <div key={item} className="flex items-center gap-2" style={{ color: '#0f172a', fontWeight: 500, fontSize: '0.9rem' }}>
-                    <div className="flex items-center justify-center w-5 h-5 rounded-full" style={{ background: 'rgba(37,99,235,0.1)', color: '#2563eb', flexShrink: 0 }}>
+                  <div key={item} className="flex items-center gap-2" style={{ color: 'var(--foreground)', fontWeight: 500, fontSize: '0.9rem' }}>
+                    <div className="flex items-center justify-center w-5 h-5 rounded-full" style={{ background: 'var(--badge-bg)', color: 'var(--accent)', flexShrink: 0 }}>
                       <Icon.check />
                     </div>
                     {item}
                   </div>
                 ))}
               </div>
-              <button className="btn-primary mt-6" onClick={() => navigate('about')}>
+              <button className="btn-primary mt-6 btn-pulse" onClick={() => navigate('about')}>
                 Learn More About Us <Icon.arrow />
               </button>
             </Reveal>
@@ -913,7 +969,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
       </section>
 
       {/* Why Choose Us */}
-      <section style={{ background: '#f8fafc', padding: '5rem 0' }}>
+      <section style={{ background: 'var(--background)', padding: '5rem 0' }}>
         <div className="max-w-7xl mx-auto px-6">
           <Reveal className="text-center mb-12">
             <div className="section-badge" style={{ justifyContent: 'center' }}>Why Choose Us</div>
@@ -929,19 +985,19 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
             {features.map((f, i) => (
               <Reveal key={f.title} delay={((i % 3) + 1) as 1 | 2 | 3 | 4 | 5 | 6}>
                 <div
-                  className="card-hover rounded-2xl p-6"
-                  style={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+                  className="card-hover card-hover-shine rounded-2xl p-6"
+                  style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
                 >
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: 'rgba(37,99,235,0.08)', color: '#2563eb' }}
+                    style={{ background: 'var(--badge-bg)', color: 'var(--accent)' }}
                   >
                     <f.icon />
                   </div>
-                  <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.5rem' }}>
+                  <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
                     {f.title}
                   </h3>
-                  <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.65 }}>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--desc-color)', lineHeight: 1.65 }}>
                     {f.desc}
                   </p>
                 </div>
@@ -952,14 +1008,14 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
       </section>
 
       {/* Featured Apps */}
-      <section style={{ background: '#fff', padding: '5rem 0' }}>
+      <section style={{ background: 'var(--background)', padding: '5rem 0' }}>
         <div className="max-w-7xl mx-auto px-6">
           <Reveal className="text-center mb-12">
             <div className="section-badge" style={{ justifyContent: 'center' }}>Our Applications</div>
-            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: '#0f172a', marginBottom: '1rem' }}>
+            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: 'var(--foreground)', marginBottom: '1rem' }}>
               Featured Applications
             </h2>
-            <p style={{ fontSize: '1rem', color: '#64748b', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>
+            <p style={{ fontSize: '1rem', color: 'var(--desc-color)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>
               Powerful business management tools available on the Google Play Store.
             </p>
           </Reveal>
@@ -981,14 +1037,14 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
       </section>
 
       {/* Screenshots / App Preview */}
-      <section style={{ background: '#f8fafc', padding: '5rem 0', overflow: 'hidden' }}>
+      <section style={{ background: 'var(--background)', padding: '5rem 0', overflow: 'hidden' }}>
         <div className="max-w-7xl mx-auto px-6">
           <Reveal className="text-center mb-14">
             <div className="section-badge" style={{ justifyContent: 'center' }}>App Gallery</div>
-            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: '#0f172a', marginBottom: '0.75rem' }}>
+            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: 'var(--foreground)', marginBottom: '0.75rem' }}>
               See It In Action
             </h2>
-            <p style={{ fontSize: '0.95rem', color: '#94a3b8', fontFamily: 'Outfit, sans-serif' }}>
+            <p style={{ fontSize: '0.95rem', color: 'var(--muted-foreground)', fontFamily: 'Outfit, sans-serif' }}>
               Screenshots coming soon — preview our app interfaces below
             </p>
           </Reveal>
@@ -1086,16 +1142,16 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                       </div>
 
                       {/* White card area */}
-                      <div style={{ flex: 1, background: '#f8fafc', borderRadius: '14px 14px 0 0', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ flex: 1, background: 'var(--background)', borderRadius: '14px 14px 0 0', padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {phone.rows.map((row, ri) => (
                           <div key={ri} style={{
-                            background: '#fff', borderRadius: '8px', padding: '6px 8px',
+                            background: 'var(--card)', borderRadius: '8px', padding: '6px 8px',
                             display: 'flex', alignItems: 'center', gap: '6px',
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                            boxShadow: 'var(--shadow)',
                           }}>
                             <div style={{ width: '20px', height: '20px', borderRadius: '6px', background: phone.color, flexShrink: 0 }} />
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: '0.55rem', fontFamily: 'Outfit, sans-serif', fontWeight: 600, color: '#0f172a', marginBottom: '2px' }}>{row}</div>
+                              <div style={{ fontSize: '0.55rem', fontFamily: 'Outfit, sans-serif', fontWeight: 600, color: 'var(--foreground)', marginBottom: '2px' }}>{row}</div>
                               <div style={{ height: '3px', background: '#e2e8f0', borderRadius: '2px', overflow: 'hidden' }}>
                                 <div style={{ width: `${40 + ri * 20}%`, height: '100%', background: 'linear-gradient(90deg, #2563eb, #0ea5e9)', borderRadius: '2px' }} />
                               </div>
@@ -1104,7 +1160,7 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
                         ))}
                         {/* Coming soon label */}
                         <div style={{ marginTop: 'auto', textAlign: 'center', padding: '4px 0' }}>
-                          <span style={{ fontSize: '0.5rem', color: '#94a3b8', fontFamily: 'Outfit, sans-serif', letterSpacing: '0.05em' }}>
+                          <span style={{ fontSize: '0.5rem', color: 'var(--muted-foreground)', fontFamily: 'Outfit, sans-serif', letterSpacing: '0.05em' }}>
                             SCREENSHOTS COMING SOON
                           </span>
                         </div>
@@ -1114,8 +1170,8 @@ function PageHome({ setPage }: { setPage: (p: Page) => void }) {
 
                   {/* Label below phone */}
                   <div style={{ textAlign: 'center', marginTop: '0.875rem' }}>
-                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.82rem', color: '#0f172a' }}>{phone.label}</div>
-                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', color: '#94a3b8' }}>{phone.sub}</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.82rem', color: 'var(--foreground)' }}>{phone.label}</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>{phone.sub}</div>
                   </div>
                 </div>
               </Reveal>
@@ -1187,29 +1243,29 @@ function PageApps({ setPage }: { setPage: (p: Page) => void }) {
       <section
         style={{
           padding: '4rem 0',
-          background: 'linear-gradient(160deg, #f0f6ff, #f8fafc)',
-          borderBottom: '1px solid #e2e8f0',
+          background: 'var(--hero-bg)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="section-badge" style={{ justifyContent: 'center' }}>Our Portfolio</div>
-          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a', marginBottom: '1rem' }}>
+          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--foreground)', marginBottom: '1rem' }}>
             Our Applications
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: '540px', margin: '0 auto', lineHeight: 1.75 }}>
+          <p style={{ fontSize: '1.05rem', color: 'var(--desc-color)', maxWidth: '540px', margin: '0 auto', lineHeight: 1.75 }}>
             Innovative business management applications available on the Google Play Store. Designed for real businesses, built for real results.
           </p>
         </div>
       </section>
 
       {/* Apps list */}
-      <section style={{ padding: '4rem 0', background: '#fff' }}>
+      <section style={{ padding: '4rem 0', background: 'var(--background)' }}>
         <div className="max-w-5xl mx-auto px-6 flex flex-col gap-12">
           {apps.map((app, i) => (
             <Reveal key={app.name} delay={(i + 1) as 1 | 2}>
               <div
-                className="rounded-3xl overflow-hidden"
-                style={{ border: '1px solid #e2e8f0', boxShadow: '0 8px 40px rgba(0,0,0,0.06)' }}
+                className="card-hover-shine rounded-3xl overflow-hidden"
+                style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow)', background: 'var(--card)' }}
               >
                 {/* App header */}
                 <div className="p-8" style={{ background: app.color }}>
@@ -1245,16 +1301,16 @@ function PageApps({ setPage }: { setPage: (p: Page) => void }) {
                 <div className="p-8">
                   <div className="grid gap-8" style={{ gridTemplateColumns: '1fr auto' }}>
                     <div>
-                      <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: '#475569', marginBottom: '1.5rem' }}>
+                      <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: 'var(--desc-color)', marginBottom: '1.5rem' }}>
                         {app.description}
                       </p>
-                      <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', marginBottom: '0.75rem' }}>
+                      <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--foreground)', marginBottom: '0.75rem' }}>
                         Key Features
                       </h4>
                       <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
                         {app.features.map((f) => (
-                          <div key={f} className="flex items-center gap-2" style={{ fontSize: '0.875rem', color: '#374151' }}>
-                            <div className="flex items-center justify-center w-5 h-5 rounded-full" style={{ background: 'rgba(37,99,235,0.1)', color: '#2563eb', flexShrink: 0 }}>
+                          <div key={f} className="flex items-center gap-2" style={{ fontSize: '0.875rem', color: 'var(--foreground)' }}>
+                            <div className="flex items-center justify-center w-5 h-5 rounded-full" style={{ background: 'var(--badge-bg)', color: 'var(--accent)', flexShrink: 0 }}>
                               <Icon.check />
                             </div>
                             {f}
@@ -1263,18 +1319,18 @@ function PageApps({ setPage }: { setPage: (p: Page) => void }) {
                       </div>
                     </div>
                     <div className="flex flex-col gap-3 justify-start" style={{ minWidth: '140px' }}>
-                      <div className="flex flex-col items-center gap-1.5 p-4 rounded-xl" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                      <div className="flex flex-col items-center gap-1.5 p-4 rounded-xl" style={{ background: 'var(--background)', border: '1px solid var(--border)', textAlign: 'center' }}>
                         <div style={{ color: '#f59e0b', display: 'flex', gap: '2px' }}>
                           {[1,2,3,4,5].map((s) => <Icon.star key={s} />)}
                         </div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.8rem', color: '#0f172a' }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.8rem', color: 'var(--foreground)' }}>
                           5.0 Rating
                         </div>
-                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Google Play Store</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--muted-foreground)' }}>Google Play Store</div>
                       </div>
                       <a
                         href="#"
-                        className="btn-primary"
+                        className="btn-primary btn-pulse"
                         style={{ justifyContent: 'center', fontSize: '0.85rem', textDecoration: 'none' }}
                       >
                         <Icon.playstore /> Download
@@ -1291,25 +1347,26 @@ function PageApps({ setPage }: { setPage: (p: Page) => void }) {
             <div
               className="rounded-3xl p-8 text-center"
               style={{
-                border: '2px dashed #e2e8f0',
-                background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+                border: '2px dashed var(--border)',
+                background: 'var(--secondary)',
               }}
             >
               <div
                 style={{
                   width: '64px', height: '64px', borderRadius: '18px',
-                  background: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+                  background: 'var(--badge-bg)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 1rem',
                   fontSize: '1.75rem',
+                  color: 'var(--accent)',
                 }}
               >
                 +
               </div>
-              <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: '#0f172a', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
                 More Apps Coming Soon
               </h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--desc-color)', marginBottom: '1.25rem' }}>
                 We are continuously developing new applications to help more businesses modernize their operations.
               </p>
               <button className="btn-outline" onClick={() => navigate('contact')}>
@@ -1340,51 +1397,51 @@ function PageAbout() {
       <section
         style={{
           padding: '4rem 0',
-          background: 'linear-gradient(160deg, #f0f6ff, #f8fafc)',
-          borderBottom: '1px solid #e2e8f0',
+          background: 'var(--hero-bg)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="section-badge" style={{ justifyContent: 'center' }}>Who We Are</div>
-          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a', marginBottom: '1rem' }}>
+          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--foreground)', marginBottom: '1rem' }}>
             About AIS Enterprises & Aasan IT
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: '560px', margin: '0 auto', lineHeight: 1.75 }}>
+          <p style={{ fontSize: '1.05rem', color: 'var(--desc-color)', maxWidth: '560px', margin: '0 auto', lineHeight: 1.75 }}>
             A passionate team dedicated to building digital tools that empower Pakistani businesses to thrive in the modern economy.
           </p>
         </div>
       </section>
 
       {/* Our Story */}
-      <section style={{ padding: '5rem 0', background: '#fff' }}>
+      <section style={{ padding: '5rem 0', background: 'var(--background)' }}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid gap-12 items-center" style={{ gridTemplateColumns: '1fr 1fr' }}>
             <Reveal>
               <div className="section-badge">Our Story</div>
-              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '2rem', color: '#0f172a', marginBottom: '1.25rem', lineHeight: 1.2 }}>
+              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '2rem', color: 'var(--foreground)', marginBottom: '1.25rem', lineHeight: 1.2 }}>
                 A Vision to Transform Business in Pakistan
               </h2>
-              <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: '#475569', marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: 'var(--desc-color)', marginBottom: '1rem' }}>
                 AIS Enterprises & Aasan IT was founded with a clear vision: to bring the power of modern technology to Pakistani businesses of all sizes. We saw businesses struggling with paperwork, manual record-keeping, and inefficient workflows.
               </p>
-              <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: '#475569' }}>
+              <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: 'var(--desc-color)' }}>
                 We set out to change that by developing simple, powerful, and affordable mobile applications available directly on the Google Play Store — tools that any business owner can use from the comfort of their smartphone.
               </p>
             </Reveal>
             <Reveal delay={2}>
-              <div className="rounded-3xl p-8" style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}>
+              <div className="rounded-3xl p-8" style={{ background: 'var(--secondary)' }}>
                 {[
                   { icon: Icon.target, label: 'Founded with Purpose', desc: 'Built to solve real business problems in Pakistan' },
                   { icon: Icon.zap, label: 'Mobile-First Approach', desc: 'Apps designed for the smartphone era' },
                   { icon: Icon.trending, label: 'Growing Portfolio', desc: 'Continuously expanding our app collection' },
                 ].map((item) => (
                   <div key={item.label} className="flex gap-4 mb-5">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fff', color: '#2563eb', boxShadow: '0 4px 12px rgba(37,99,235,0.1)' }}>
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--card)', color: 'var(--accent)', boxShadow: 'var(--shadow)' }}>
                       <item.icon />
                     </div>
                     <div>
-                      <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', marginBottom: '0.2rem' }}>{item.label}</div>
-                      <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{item.desc}</div>
+                      <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: 'var(--foreground)', marginBottom: '0.2rem' }}>{item.label}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--desc-color)' }}>{item.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -1395,7 +1452,7 @@ function PageAbout() {
       </section>
 
       {/* Mission & Vision */}
-      <section style={{ padding: '5rem 0', background: '#f8fafc' }}>
+      <section style={{ padding: '5rem 0', background: 'var(--background)' }}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
             <Reveal>
@@ -1421,16 +1478,16 @@ function PageAbout() {
             <Reveal delay={2}>
               <div
                 className="rounded-3xl p-8 h-full"
-                style={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
+                style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
               >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: 'rgba(37,99,235,0.08)', color: '#2563eb' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: 'var(--badge-bg)', color: 'var(--accent)' }}>
                   <Icon.eye />
                 </div>
                 <div className="section-badge">Our Vision</div>
-                <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: '#0f172a', marginBottom: '1rem', marginTop: '0.75rem' }}>
+                <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: 'var(--foreground)', marginBottom: '1rem', marginTop: '0.75rem' }}>
                   Empower Every Business
                 </h3>
-                <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: '#64748b' }}>
+                <p style={{ fontSize: '0.95rem', lineHeight: 1.8, color: 'var(--desc-color)' }}>
                   Become a trusted provider of digital business solutions that empower businesses of all sizes. We envision a future where every Pakistani business operates efficiently through smart, accessible digital tools.
                 </p>
               </div>
@@ -1440,11 +1497,11 @@ function PageAbout() {
       </section>
 
       {/* Core Values */}
-      <section style={{ padding: '5rem 0', background: '#fff' }}>
+      <section style={{ padding: '5rem 0', background: 'var(--background)' }}>
         <div className="max-w-7xl mx-auto px-6">
           <Reveal className="text-center mb-12">
             <div className="section-badge" style={{ justifyContent: 'center' }}>What We Stand For</div>
-            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: '#0f172a', marginBottom: '1rem' }}>
+            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 'clamp(1.75rem, 3vw, 2.4rem)', color: 'var(--foreground)', marginBottom: '1rem' }}>
               Our Core Values
             </h2>
           </Reveal>
@@ -1453,16 +1510,16 @@ function PageAbout() {
             {values.map((v, i) => (
               <Reveal key={v.title} delay={((i % 3) + 1) as 1 | 2 | 3}>
                 <div
-                  className="card-hover rounded-2xl p-6"
-                  style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+                  className="card-hover card-hover-shine rounded-2xl p-6"
+                  style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
                 >
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', color: '#fff' }}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: 'linear-gradient(135deg, var(--primary), var(--accent))', color: '#fff' }}>
                     <v.icon />
                   </div>
-                  <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.5rem' }}>
+                  <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.05rem', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
                     {v.title}
                   </h3>
-                  <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.65 }}>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--desc-color)', lineHeight: 1.65 }}>
                     {v.desc}
                   </p>
                 </div>
@@ -1490,11 +1547,11 @@ function PageContact() {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '0.75rem 1rem',
-    border: '1.5px solid #e2e8f0',
+    border: '1.5px solid var(--border)',
     borderRadius: '10px',
     fontSize: '0.9rem',
-    color: '#0f172a',
-    background: '#f8fafc',
+    color: 'var(--foreground)',
+    background: 'var(--input-bg)',
     outline: 'none',
     transition: 'all 0.2s',
     fontFamily: 'Inter, sans-serif',
@@ -1505,7 +1562,7 @@ function PageContact() {
     fontFamily: 'Outfit, sans-serif',
     fontWeight: 600,
     fontSize: '0.875rem',
-    color: '#374151',
+    color: 'var(--foreground)',
     marginBottom: '0.4rem',
   }
 
@@ -1522,32 +1579,32 @@ function PageContact() {
       <section
         style={{
           padding: '4rem 0',
-          background: 'linear-gradient(160deg, #f0f6ff, #f8fafc)',
-          borderBottom: '1px solid #e2e8f0',
+          background: 'var(--hero-bg)',
+          borderBottom: '1px solid var(--border)',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="section-badge" style={{ justifyContent: 'center' }}>Get In Touch</div>
-          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a', marginBottom: '1rem' }}>
+          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--foreground)', marginBottom: '1rem' }}>
             Contact Us
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#64748b', maxWidth: '480px', margin: '0 auto', lineHeight: 1.75 }}>
+          <p style={{ fontSize: '1.05rem', color: 'var(--desc-color)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.75 }}>
             Have a question or want to learn more about our applications? We would love to hear from you.
           </p>
         </div>
       </section>
 
       {/* Contact content */}
-      <section style={{ padding: '5rem 0', background: '#fff' }}>
+      <section style={{ padding: '5rem 0', background: 'var(--background)' }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid gap-10 items-start" style={{ gridTemplateColumns: '1fr 1.3fr' }}>
             {/* Info panel */}
             <div>
               <Reveal>
-                <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.6rem', color: '#0f172a', marginBottom: '0.75rem' }}>
+                <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.6rem', color: 'var(--foreground)', marginBottom: '0.75rem' }}>
                   We're Here to Help
                 </h2>
-                <p style={{ fontSize: '0.95rem', color: '#64748b', lineHeight: 1.8, marginBottom: '2rem' }}>
+                <p style={{ fontSize: '0.95rem', color: 'var(--desc-color)', lineHeight: 1.8, marginBottom: '2rem' }}>
                   Reach out through any of the channels below. Our team typically responds within 24 hours.
                 </p>
 
@@ -1561,17 +1618,17 @@ function PageContact() {
                       style={{ textDecoration: 'none' }}
                     >
                       <div
-                        className="flex items-center gap-4 p-4 rounded-2xl card-hover"
-                        style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+                        className="flex items-center gap-4 p-4 rounded-2xl card-hover card-hover-shine"
+                        style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}
                       >
-                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(37,99,235,0.08)', color: '#2563eb' }}>
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--badge-bg)', color: 'var(--accent)' }}>
                           <item.icon />
                         </div>
                         <div>
-                          <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.8rem', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             {item.label}
                           </div>
-                          <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>
+                          <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.95rem', color: 'var(--foreground)' }}>
                             {item.value}
                           </div>
                         </div>
@@ -1586,16 +1643,16 @@ function PageContact() {
                 <div
                   className="rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3"
                   style={{
-                    background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
-                    border: '1px solid #bfdbfe',
+                    background: 'var(--secondary)',
+                    border: '1px solid var(--border)',
                     height: '200px',
                   }}
                 >
-                  <div style={{ color: '#2563eb' }}><Icon.map /></div>
-                  <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: '#1e3a8a' }}>
+                  <div style={{ color: 'var(--accent)' }}><Icon.map /></div>
+                  <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.9rem', color: 'var(--foreground)' }}>
                     Pakistan
                   </p>
-                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--desc-color)' }}>
                     Serving businesses across Pakistan
                   </p>
                 </div>
@@ -1607,29 +1664,29 @@ function PageContact() {
               <div
                 className="rounded-3xl p-8"
                 style={{
-                  background: '#fff',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 8px 40px rgba(0,0,0,0.07)',
+                  background: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  boxShadow: 'var(--shadow)',
                 }}
               >
                 {submitted ? (
                   <div className="text-center py-8">
                     <div
                       className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                      style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}
+                      style={{ background: 'var(--badge-bg)', color: 'var(--accent)' }}
                     >
                       <Icon.check />
                     </div>
-                    <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: '#0f172a', marginBottom: '0.5rem' }}>
+                    <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
                       Message Sent!
                     </h3>
-                    <p style={{ color: '#64748b', fontSize: '0.9rem' }}>
+                    <p style={{ color: 'var(--desc-color)', fontSize: '0.9rem' }}>
                       Thank you for reaching out. We will get back to you within 24 hours.
                     </p>
                   </div>
                 ) : (
                   <>
-                    <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: '#0f172a', marginBottom: '1.75rem' }}>
+                    <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: 'var(--foreground)', marginBottom: '1.75rem' }}>
                       Send us a Message
                     </h3>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -1642,8 +1699,8 @@ function PageContact() {
                             value={form.name}
                             required
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff' }}
-                            onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc' }}
+                            onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.background = 'var(--card)' }}
+                            onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--input-bg)' }}
                           />
                         </div>
                         <div>
@@ -1655,8 +1712,8 @@ function PageContact() {
                             value={form.email}
                             required
                             onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff' }}
-                            onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc' }}
+                            onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.background = 'var(--card)' }}
+                            onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--input-bg)' }}
                           />
                         </div>
                       </div>
@@ -1669,8 +1726,8 @@ function PageContact() {
                           placeholder="0300-0000000"
                           value={form.phone}
                           onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                          onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff' }}
-                          onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc' }}
+                          onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.background = 'var(--card)' }}
+                          onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--input-bg)' }}
                         />
                       </div>
 
@@ -1682,8 +1739,8 @@ function PageContact() {
                           value={form.subject}
                           required
                           onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                          onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff' }}
-                          onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc' }}
+                          onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.background = 'var(--card)' }}
+                          onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--input-bg)' }}
                         />
                       </div>
 
@@ -1695,12 +1752,12 @@ function PageContact() {
                           value={form.message}
                           required
                           onChange={(e) => setForm({ ...form, message: e.target.value })}
-                          onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff' }}
-                          onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc' }}
+                          onFocus={(e) => { e.target.style.borderColor = 'var(--accent)'; e.target.style.background = 'var(--card)' }}
+                          onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'var(--input-bg)' }}
                         />
                       </div>
 
-                      <button type="submit" className="btn-primary" style={{ justifyContent: 'center', padding: '0.85rem', fontSize: '0.95rem' }}>
+                      <button type="submit" className="btn-primary btn-pulse" style={{ justifyContent: 'center', padding: '0.85rem', fontSize: '0.95rem' }}>
                         Send Message <Icon.send />
                       </button>
                     </form>
@@ -1718,20 +1775,42 @@ function PageContact() {
 // ── Root ──────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState<Page>('home')
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+    }
+    return 'light'
+  })
+
+  useEffect(() => {
+    const root = window.document.documentElement
+    if (theme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+    localStorage.setItem('theme', theme)
+  }, [theme])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [page])
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+  }
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
-      <Nav current={page} setPage={setPage} />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)', color: 'var(--foreground)' }}>
+      <Nav current={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme} />
 
       <main style={{ flex: 1 }}>
-        {page === 'home' && <PageHome setPage={setPage} />}
-        {page === 'apps' && <PageApps setPage={setPage} />}
-        {page === 'about' && <PageAbout />}
-        {page === 'contact' && <PageContact />}
+        <div key={page} className="tab-pane">
+          {page === 'home' && <PageHome setPage={setPage} />}
+          {page === 'apps' && <PageApps setPage={setPage} />}
+          {page === 'about' && <PageAbout />}
+          {page === 'contact' && <PageContact />}
+        </div>
       </main>
 
       <Footer setPage={setPage} />
