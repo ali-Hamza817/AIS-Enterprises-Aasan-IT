@@ -16,12 +16,53 @@ const PAGE_PATHS: Record<Page, string> = {
 }
 
 const PAGE_TITLES: Record<Page, string> = {
-  home: 'AIS Enterprises & Aasan IT',
+  home: 'AIS Enterprises & Aasan IT | Business Management Apps',
   apps: 'Our Applications | AIS Enterprises & Aasan IT',
   about: 'About Us | AIS Enterprises & Aasan IT',
   contact: 'Contact Us | AIS Enterprises & Aasan IT',
   privacy: 'Privacy Policy | Asan Dairy | Aasan IT',
   'delete-account': 'Delete Account Request | Asan Dairy | Aasan IT',
+}
+
+const SITE_URL = 'https://www.aasanit.com'
+
+const PAGE_DESCRIPTIONS: Record<Page, string> = {
+  home: 'AIS Enterprises & Aasan IT builds easy business management apps for Android, like Aasan Dairy and Aasan Transport, that save time, reduce paperwork and digitise your business.',
+  apps: 'Explore Aasan Dairy, Aasan Transport and more business management apps by AIS Enterprises & Aasan IT, available on Google Play.',
+  about: 'Learn about AIS Enterprises & Aasan IT: our story, mission, vision and the values behind our digital business management solutions.',
+  contact: 'Contact AIS Enterprises & Aasan IT by phone, email or Instagram. Call +92 348 7707139 for help with our business management apps.',
+  privacy: 'Privacy Policy for the Asan Dairy Android app by Aasan IT: what data the app collects, where it is stored, who it is shared with and your rights.',
+  'delete-account': 'Request deletion of your Asan Dairy account and its cloud data. Submit your email and reason and Aasan IT will confirm by email.',
+}
+
+function setMeta(attr: 'name' | 'property', key: string, content: string) {
+  let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute(attr, key)
+    document.head.appendChild(el)
+  }
+  el.content = content
+}
+
+function applyPageSeo(page: Page) {
+  const url = SITE_URL + PAGE_PATHS[page]
+  const title = PAGE_TITLES[page]
+  const desc = PAGE_DESCRIPTIONS[page]
+  document.title = title
+  setMeta('name', 'description', desc)
+  setMeta('property', 'og:title', title)
+  setMeta('property', 'og:description', desc)
+  setMeta('property', 'og:url', url)
+  setMeta('name', 'twitter:title', title)
+  setMeta('name', 'twitter:description', desc)
+  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  if (!canonical) {
+    canonical = document.createElement('link')
+    canonical.rel = 'canonical'
+    document.head.appendChild(canonical)
+  }
+  canonical.href = url
 }
 
 // Extra aliases people may type or that apps may already link to.
@@ -70,6 +111,8 @@ function Nav({
     { label: 'About', page: 'about' },
     { label: 'Applications', page: 'apps' },
     { label: 'Contact', page: 'contact' },
+    { label: 'Privacy Policy', page: 'privacy' },
+    { label: 'Delete Account', page: 'delete-account' },
   ]
 
   const navigate = (page: Page) => {
@@ -112,7 +155,7 @@ function Nav({
         </button>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-0.5">
           {links.map((l) => (
             <button
               key={l.page}
@@ -125,7 +168,8 @@ function Nav({
                 background: current === l.page ? 'var(--badge-bg)' : 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: '0.4rem 0.85rem',
+                padding: '0.4rem 0.7rem',
+                whiteSpace: 'nowrap',
                 borderRadius: '7px',
                 transition: 'all 0.2s',
               }}
@@ -148,7 +192,7 @@ function Nav({
         </div>
 
         {/* CTA & Theme toggle */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <button
             onClick={toggleTheme}
             className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 hover:scale-105"
@@ -168,7 +212,7 @@ function Nav({
         </div>
 
         {/* Mobile controls */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-2">
           <button
             onClick={toggleTheme}
             className="w-9 h-9 rounded-lg flex items-center justify-center border"
@@ -196,7 +240,7 @@ function Nav({
       {/* Mobile menu */}
       <div
         style={{
-          maxHeight: mobileOpen ? '400px' : '0',
+          maxHeight: mobileOpen ? '560px' : '0',
           overflow: 'hidden',
           transition: 'max-height 0.35s ease',
           background: 'var(--nav-bg-scrolled)',
@@ -1675,7 +1719,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    document.title = PAGE_TITLES[page]
+    applyPageSeo(page)
   }, [page])
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
